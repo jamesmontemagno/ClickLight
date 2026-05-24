@@ -8,4 +8,5 @@ DerivedData/
 dist/
 **/bin/
 **/obj/
+**/.mono/
 .vs/
