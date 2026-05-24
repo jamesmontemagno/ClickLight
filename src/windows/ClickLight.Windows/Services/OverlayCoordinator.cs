@@ -31,7 +31,10 @@ public sealed class OverlayCoordinator : IDisposable
 
     public void Show(ClickEvent clickEvent)
     {
-        var screen = Screen.AllScreens.FirstOrDefault(candidate => candidate.Bounds.Contains((int)clickEvent.X, (int)clickEvent.Y))
+        var screenX = (int)Math.Floor(clickEvent.X);
+        var screenY = (int)Math.Floor(clickEvent.Y);
+
+        var screen = Screen.AllScreens.FirstOrDefault(candidate => candidate.Bounds.Contains(screenX, screenY))
             ?? Screen.PrimaryScreen;
 
         if (screen is null)
