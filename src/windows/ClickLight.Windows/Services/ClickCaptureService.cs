@@ -8,6 +8,7 @@ namespace ClickLight.Windows.Services;
 
 public sealed class ClickCaptureService : IDisposable
 {
+    private const int KeyDownMask = 0x8000;
     private readonly DispatcherQueue _dispatcherQueue;
     private NativeMethods.HookProc? _hookProc;
     private IntPtr _hookHandle;
@@ -87,8 +88,8 @@ public sealed class ClickCaptureService : IDisposable
 
     private bool IsDragging(NativeMethods.POINT point)
     {
-        var isDown = (NativeMethods.GetAsyncKeyState(NativeMethods.VK_LBUTTON) & 0x8000) != 0 ||
-                     (NativeMethods.GetAsyncKeyState(NativeMethods.VK_RBUTTON) & 0x8000) != 0;
+        var isDown = (NativeMethods.GetAsyncKeyState(NativeMethods.VK_LBUTTON) & KeyDownMask) != 0 ||
+                     (NativeMethods.GetAsyncKeyState(NativeMethods.VK_RBUTTON) & KeyDownMask) != 0;
 
         if (!isDown)
         {
