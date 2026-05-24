@@ -81,6 +81,21 @@ The workflow will:
 6. update `Casks/clicklight.rb`
 7. create a GitHub Release
 
+## Windows Release Direction
+
+An experimental WinUI 3 sibling app now lives in `src/windows`.
+
+Current repository support includes:
+
+- `src/windows/build-windows.ps1` for local publish output
+- `.github/workflows/windows.yml` for restore, build, publish, and artifact upload on Windows runners
+
+Before shipping Windows releases broadly, add:
+
+- code signing for the published Windows binaries
+- a chosen distribution path such as GitHub Releases, winget, or App Installer
+- a real update implementation in place of the current stub service
+
 ## Homebrew Install
 
 After the first release updates `Casks/clicklight.rb` with a real version and SHA, users can install with:

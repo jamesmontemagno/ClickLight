@@ -2,6 +2,8 @@
 
 This project is meant to be easy to modify. The app is small, native Swift/AppKit, and built from the command line.
 
+For the experimental Windows app, see [Windows Development](WINDOWS_DEVELOPMENT.md).
+
 ClickLight does not use an `.xcodeproj` or `.xcworkspace`. It is a Swift Package Manager executable wrapped into a standard macOS `.app` bundle by `build-app.sh`.
 
 ## Prerequisites

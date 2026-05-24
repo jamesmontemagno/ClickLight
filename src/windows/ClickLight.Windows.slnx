@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ClickLight.Windows.Core/ClickLight.Windows.Core.csproj" />
+  <Project Path="ClickLight.Windows/ClickLight.Windows.csproj" />
+</Solution>

@@ -26,6 +26,7 @@ brew install --cask aurorascharff/clicklight/clicklight
 - Optional compact menu-bar icon
 - Test pulse for verifying overlay behavior
 - Native Swift/AppKit app
+- Experimental native WinUI 3 Windows app in `src/windows`
 - No Xcode project required
 
 ## Permissions
@@ -41,6 +42,8 @@ After enabling permission, quit ClickLight from the menu bar and reopen it.
 ClickLight is personal software: one small presentation annoyance, fixed directly. The project is intentionally small so you or an agent can change it without much ceremony.
 
 Start with [Local Development](docs/LOCAL_DEVELOPMENT.md).
+
+For the Windows implementation, see [Windows Development](docs/WINDOWS_DEVELOPMENT.md).
 
 ## Releasing
 

@@ -6,3 +6,6 @@ ClickLight.zip
 DerivedData/
 .vscode/
 dist/
+**/bin/
+**/obj/
+.vs/

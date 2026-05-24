@@ -1,0 +1,43 @@
+name: Windows
+
+on:
+  push:
+    paths:
+      - "src/windows/**"
+      - ".github/workflows/windows.yml"
+      - "docs/WINDOWS_DEVELOPMENT.md"
+      - "README.md"
+  pull_request:
+    paths:
+      - "src/windows/**"
+      - ".github/workflows/windows.yml"
+      - "docs/WINDOWS_DEVELOPMENT.md"
+      - "README.md"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore src/windows/ClickLight.Windows/ClickLight.Windows.csproj
+
+      - name: Build
+        run: dotnet build src/windows/ClickLight.Windows/ClickLight.Windows.csproj -c Release --no-restore
+
+      - name: Publish
+        shell: pwsh
+        run: ./src/windows/build-windows.ps1 -Configuration Release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: clicklight-windows
+          path: src/windows/artifacts/Release/win-x64
