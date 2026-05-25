@@ -2,7 +2,7 @@
 
 ClickLight has release scaffolding for Developer ID signing, notarization, Sparkle updates, GitHub Releases, and a Homebrew cask.
 
-Until the first release succeeds, the Homebrew cask contains placeholder version and checksum values, and Sparkle is disabled by the placeholder public key in `Info.plist`.
+Until the first release succeeds, the Homebrew cask contains placeholder version and checksum values.
 
 ## Required Apple Setup
 
@@ -36,21 +36,13 @@ Developer ID Application: Your Name (TEAMID)
 
 ## Sparkle Public Key
 
-Generate a Sparkle key pair with Sparkle's `generate_keys` tool.
-
-Put the public key in `Info.plist`:
+The Sparkle public key is stored in `Info.plist`:
 
 ```text
 SUPublicEDKey
 ```
 
-The private key goes in the `SPARKLE_PRIVATE_KEY` GitHub secret.
-
-The app intentionally disables update checks while `SUPublicEDKey` is still set to:
-
-```text
-REPLACE_WITH_SPARKLE_PUBLIC_ED_KEY
-```
+The matching private key goes in the `SPARKLE_PRIVATE_KEY` GitHub secret.
 
 ## GitHub Environment Approval
 

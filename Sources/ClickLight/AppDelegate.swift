@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var statusController = StatusController(
         settingsStore: settingsStore,
         permissions: permissions,
+        launchAtLogin: launchAtLogin,
         captureStatus: { [weak self] in self?.captureController.statusLabel ?? "Not Started" },
         onCheckForUpdates: { UpdateChecker.shared.checkForUpdates() },
         updatesAreConfigured: { UpdateChecker.shared.isConfigured },
@@ -16,6 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     )
     private let eventTap = ClickEventTap()
     private let permissions = PermissionController()
+    private let launchAtLogin = LaunchAtLoginController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         overlayCoordinator.start()

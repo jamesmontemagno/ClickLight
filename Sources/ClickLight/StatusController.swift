@@ -5,6 +5,7 @@ final class StatusController {
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let settingsStore: SettingsStore
     private let permissions: PermissionController
+    private let launchAtLogin: LaunchAtLoginManaging
     private let captureStatus: () -> String
     private let onCheckForUpdates: () -> Void
     private let updatesAreConfigured: () -> Bool
@@ -14,6 +15,7 @@ final class StatusController {
     init(
         settingsStore: SettingsStore,
         permissions: PermissionController,
+        launchAtLogin: LaunchAtLoginManaging,
         captureStatus: @escaping () -> String,
         onCheckForUpdates: @escaping () -> Void,
         updatesAreConfigured: @escaping () -> Bool,
@@ -22,6 +24,7 @@ final class StatusController {
     ) {
         self.settingsStore = settingsStore
         self.permissions = permissions
+        self.launchAtLogin = launchAtLogin
         self.captureStatus = captureStatus
         self.onCheckForUpdates = onCheckForUpdates
         self.updatesAreConfigured = updatesAreConfigured
@@ -51,6 +54,7 @@ final class StatusController {
     private func rebuildMenu() {
         let settings = settingsStore.settings
         let menu = NSMenu()
+        StatusMenuConfiguration.apply(to: menu)
 
         menu.addItem(toggleItem(
             title: "Enabled",
@@ -84,6 +88,11 @@ final class StatusController {
             title: "Show Menu Bar Text",
             isOn: settings.showMenuBarText,
             action: #selector(toggleMenuBarText)
+        ))
+        menu.addItem(toggleItem(
+            title: "Launch at Login",
+            isOn: launchAtLogin.isEnabled,
+            action: #selector(toggleLaunchAtLogin)
         ))
         menu.addItem(NSMenuItem.separator())
 
@@ -120,6 +129,7 @@ final class StatusController {
             selected: settings.duration,
             action: #selector(selectDuration(_:))
         ))
+        menu.addItem(colorSubmenu(selected: settings.colorPreset))
         menu.addItem(NSMenuItem.separator())
 
         let captureItem = NSMenuItem(title: "Click Capture: \(captureStatus())", action: nil, keyEquivalent: "")
@@ -128,6 +138,7 @@ final class StatusController {
 
         let testPulseItem = NSMenuItem(title: "Test Pulse at Pointer", action: #selector(testPulse), keyEquivalent: "")
         testPulseItem.target = self
+        testPulseItem.isEnabled = StatusMenuAvailability.isTestPulseEnabled(isClickLightEnabled: settings.isEnabled)
         menu.addItem(testPulseItem)
         menu.addItem(NSMenuItem.separator())
 
@@ -187,6 +198,20 @@ final class StatusController {
         return item
     }
 
+    private func colorSubmenu(selected: ClickColorPreset) -> NSMenuItem {
+        let item = NSMenuItem(title: "Colors", action: nil, keyEquivalent: "")
+        let menu = NSMenu()
+        for preset in ClickColorPreset.allCases {
+            let child = NSMenuItem(title: preset.title, action: #selector(selectColor(_:)), keyEquivalent: "")
+            child.target = self
+            child.representedObject = preset.rawValue
+            child.state = preset == selected ? .on : .off
+            menu.addItem(child)
+        }
+        item.submenu = menu
+        return item
+    }
+
     @objc private func toggleEnabled() {
         settingsStore.update { $0.isEnabled.toggle() }
     }
@@ -211,6 +236,16 @@ final class StatusController {
         settingsStore.update { $0.showMenuBarText.toggle() }
     }
 
+    @objc private func toggleLaunchAtLogin() {
+        let enabled = LaunchAtLoginState.toggledValue(currentlyEnabled: launchAtLogin.isEnabled)
+        do {
+            try launchAtLogin.setEnabled(enabled)
+        } catch {
+            NSLog("ClickLight: Failed to update launch at login: \(error)")
+        }
+        rebuildMenu()
+    }
+
     @objc private func selectSize(_ sender: NSMenuItem) {
         guard let value = sender.representedObject as? Double else { return }
         settingsStore.update { $0.size = CGFloat(value) }
@@ -224,6 +259,14 @@ final class StatusController {
     @objc private func selectDuration(_ sender: NSMenuItem) {
         guard let value = sender.representedObject as? Double else { return }
         settingsStore.update { $0.duration = value }
+    }
+
+    @objc private func selectColor(_ sender: NSMenuItem) {
+        guard
+            let rawValue = sender.representedObject as? String,
+            let preset = ClickColorPreset(rawValue: rawValue)
+        else { return }
+        settingsStore.update { $0.colorPreset = preset }
     }
 
     @objc private func openAccessibilitySettings() {
