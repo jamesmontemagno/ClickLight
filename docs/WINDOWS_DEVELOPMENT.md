@@ -34,7 +34,7 @@ src/windows
 
 ## Local Build
 
-On Windows with the .NET 8 SDK and Windows App SDK prerequisites installed:
+On Windows with the .NET 10 SDK and Windows App SDK prerequisites installed:
 
 ```powershell
 cd src/windows
