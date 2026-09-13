@@ -10,8 +10,8 @@ cask "clicklight" do
 
   app "ClickLight.app"
 
-  postflight do
-    system "xattr", "-cr", "#{appdir}/ClickLight.app"
+  postflight_steps do
+    run "/usr/bin/xattr", args: ["-cr", "{{appdir}}/ClickLight.app"]
   end
 
   zap trash: [
