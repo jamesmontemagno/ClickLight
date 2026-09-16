@@ -1246,7 +1246,7 @@ private struct ClickActivityHistoryGraph: View {
     }
 
     private func drawGrid(in context: inout GraphicsContext, size: CGSize) {
-        guard size.width > 0, size.height > 0 else { return }
+        guard size.width > 0, size.height > 0, gridDivisions > 0 else { return }
         let graphHeight = max(1, size.height - graphInsets.top - graphInsets.bottom)
 
         for index in 0...gridDivisions {

@@ -119,13 +119,13 @@ final class ClickActivityStore: ObservableObject {
         return Int((Double(totalClicks(for: days)) / Double(days.count)).rounded())
     }
 
-    /// Returns the latest peak activity day, or nil when the range has no recorded clicks.
+    /// Returns the most recent day with the highest click total, or nil when the range has no recorded clicks.
     func peakDay(in days: [ClickActivityDay]) -> ClickActivityDay? {
         guard let index = peakDayIndex(in: days) else { return nil }
         return days[index]
     }
 
-    /// Returns the latest peak activity index, or nil when the range has no recorded clicks.
+    /// Returns the index of the most recent day with the highest click total, or nil when the range has no recorded clicks.
     func peakDayIndex(in days: [ClickActivityDay]) -> [ClickActivityDay].Index? {
         guard let index = days.indices.max(by: { days[$0].totalClicks < days[$1].totalClicks }),
               days[index].totalClicks > 0 else {
