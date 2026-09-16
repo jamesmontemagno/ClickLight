@@ -37,8 +37,27 @@ final class ClickActivityStore: ObservableObject {
     }
 
     var lastSevenDays: [ClickActivityDay] {
-        (0..<7).reversed().compactMap { offset in
-            guard let date = calendar.date(byAdding: .day, value: -offset, to: Date()) else {
+        recentDays(count: 7)
+    }
+
+    var lastThirtyDays: [ClickActivityDay] {
+        recentDays(count: 30)
+    }
+
+    var lastThirtyDaysTotalClicks: Int {
+        lastThirtyDays.reduce(0) { $0 + $1.totalClicks }
+    }
+
+    var lastThirtyDaysAverageClicks: Int {
+        let history = lastThirtyDays
+        guard !history.isEmpty else { return 0 }
+        return Int((Double(history.reduce(0) { $0 + $1.totalClicks }) / Double(history.count)).rounded())
+    }
+
+    private func recentDays(count: Int) -> [ClickActivityDay] {
+        let now = Date()
+        return (0..<count).reversed().compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: now) else {
                 return nil
             }
             let id = dayID(for: date)
@@ -87,9 +106,22 @@ final class ClickActivityStore: ObservableObject {
         return date.formatted(.dateTime.weekday(.abbreviated))
     }
 
+    func shortDateLabel(for day: ClickActivityDay) -> String {
+        guard let date = date(from: day.id) else { return day.id }
+        return date.formatted(.dateTime.month(.abbreviated).day())
+    }
+
     func accessibilityLabel(for day: ClickActivityDay) -> String {
         let dateLabel = date(from: day.id)?.formatted(date: .complete, time: .omitted) ?? day.id
-        return "\(dateLabel), \(day.totalClicks) clicks"
+        return "\(dateLabel), \(day.totalClicks) clicks, \(day.drags) drags"
+    }
+
+    func historyAccessibilityLabel(for days: [ClickActivityDay]) -> String {
+        let total = days.reduce(0) { $0 + $1.totalClicks }
+        let average = days.isEmpty ? 0 : Int((Double(total) / Double(days.count)).rounded())
+        let peak = days.max { $0.totalClicks < $1.totalClicks }
+        let peakLabel = peak.map { "\(shortDateLabel(for: $0)) with \($0.totalClicks) clicks" } ?? "no activity"
+        return "Click history graph, \(total) clicks over \(days.count) days, \(average) average clicks per day, peak \(peakLabel)"
     }
 
     private func add(_ update: (inout ClickActivityDay) -> Void) {
@@ -119,7 +151,7 @@ final class ClickActivityStore: ObservableObject {
     }
 
     private func pruneAndSave() {
-        guard let cutoff = calendar.date(byAdding: .day, value: -6, to: Date()) else { return }
+        guard let cutoff = calendar.date(byAdding: .day, value: -29, to: Date()) else { return }
         let cutoffID = dayID(for: cutoff)
         days = days.filter { $0.id >= cutoffID }.sorted { $0.id < $1.id }
         guard let encoded = try? encoder.encode(days) else { return }
