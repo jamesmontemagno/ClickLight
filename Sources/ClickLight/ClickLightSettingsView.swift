@@ -826,7 +826,7 @@ struct ClickLightSettingsView: View {
                 }
                 .padding(.vertical, 6)
 
-                ClickActivityHistoryGraph(days: historyDays, store: activityStore)
+                ClickActivityHistoryGraph(days: historyDays, rangeTitle: "Last 30 days", store: activityStore)
                     .frame(height: 160)
                     .padding(.top, 8)
             }
@@ -1217,7 +1217,8 @@ private struct ClickActivityChart: View {
 
 private struct ClickActivityHistoryGraph: View {
     let days: [ClickActivityDay]
-    @ObservedObject var store: ClickActivityStore
+    let rangeTitle: String
+    let store: ClickActivityStore
 
     private var graphInsets: EdgeInsets {
         EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
@@ -1236,7 +1237,7 @@ private struct ClickActivityHistoryGraph: View {
                 HStack {
                     Text(store.shortDateLabel(for: first))
                     Spacer()
-                    Text("Last \(days.count) days")
+                    Text(rangeTitle)
                     Spacer()
                     Text(store.shortDateLabel(for: last))
                 }
