@@ -106,10 +106,23 @@ final class ClickActivityStore: ObservableObject {
         return "\(dateLabel), \(day.totalClicks) clicks"
     }
 
+    func totalClicks(for days: [ClickActivityDay]) -> Int {
+        days.reduce(0) { $0 + $1.totalClicks }
+    }
+
+    func dailyAverageClicks(for days: [ClickActivityDay]) -> Int {
+        guard !days.isEmpty else { return 0 }
+        return Int((Double(totalClicks(for: days)) / Double(days.count)).rounded())
+    }
+
+    func peakDay(in days: [ClickActivityDay]) -> ClickActivityDay? {
+        days.max { $0.totalClicks < $1.totalClicks }
+    }
+
     func historyAccessibilityLabel(for days: [ClickActivityDay]) -> String {
-        let total = days.reduce(0) { $0 + $1.totalClicks }
-        let average = days.isEmpty ? 0 : Int((Double(total) / Double(days.count)).rounded())
-        let peak = days.max { $0.totalClicks < $1.totalClicks }
+        let total = totalClicks(for: days)
+        let average = dailyAverageClicks(for: days)
+        let peak = peakDay(in: days)
         let peakLabel = peak.map { "\(shortDateLabel(for: $0)) with \($0.totalClicks) clicks" } ?? "no activity"
         return "Click history graph, \(total) clicks over \(days.count) days, \(average) average clicks per day, peak \(peakLabel)"
     }
