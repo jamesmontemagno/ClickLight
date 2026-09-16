@@ -794,6 +794,7 @@ struct ClickLightSettingsView: View {
         let historyDays = activityStore.lastThirtyDays
         let historyTotal = activityStore.totalClicks(for: historyDays)
         let historyAverage = activityStore.dailyAverageClicks(for: historyDays)
+        let historyRangeTitle = "Last \(historyDays.count) Days"
 
         return VStack(spacing: 16) {
             SettingsCard(
@@ -816,8 +817,8 @@ struct ClickLightSettingsView: View {
             }
 
             SettingsCard(
-                title: "Last 30 Days",
-                subtitle: "A 30-day trend of click activity saved locally on this Mac."
+                title: historyRangeTitle,
+                subtitle: "A \(historyDays.count)-day trend of click activity saved locally on this Mac."
             ) {
                 HStack(spacing: 0) {
                     ActivityMetric(title: "30-day total", value: historyTotal)
@@ -826,7 +827,7 @@ struct ClickLightSettingsView: View {
                 }
                 .padding(.vertical, 6)
 
-                ClickActivityHistoryGraph(days: historyDays, rangeTitle: "Last 30 days", store: activityStore)
+                ClickActivityHistoryGraph(days: historyDays, store: activityStore)
                     .frame(height: 160)
                     .padding(.top, 8)
             }
@@ -1217,7 +1218,6 @@ private struct ClickActivityChart: View {
 
 private struct ClickActivityHistoryGraph: View {
     let days: [ClickActivityDay]
-    let rangeTitle: String
     let store: ClickActivityStore
     private let gridDivisions = 3
     private let graphInsets = EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
@@ -1235,7 +1235,7 @@ private struct ClickActivityHistoryGraph: View {
                 HStack {
                     Text(store.shortDateLabel(for: first))
                     Spacer()
-                    Text(rangeTitle)
+                    Text("\(days.count)-day trend")
                     Spacer()
                     Text(store.shortDateLabel(for: last))
                 }
