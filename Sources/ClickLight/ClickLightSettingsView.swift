@@ -1215,8 +1215,8 @@ private struct ClickActivityHistoryGraph: View {
     let days: [ClickActivityDay]
     @ObservedObject var store: ClickActivityStore
 
-    private var maximum: Int {
-        max(1, days.map(\.totalClicks).max() ?? 1)
+    private var graphInsets: EdgeInsets {
+        EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
     }
 
     var body: some View {
@@ -1244,7 +1244,6 @@ private struct ClickActivityHistoryGraph: View {
 
     private func drawGrid(in context: inout GraphicsContext, size: CGSize) {
         guard size.width > 0, size.height > 0 else { return }
-        let graphInsets = EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
         let graphHeight = max(1, size.height - graphInsets.top - graphInsets.bottom)
 
         for index in 0...3 {
@@ -1259,12 +1258,13 @@ private struct ClickActivityHistoryGraph: View {
     private func drawTrend(in context: inout GraphicsContext, size: CGSize) {
         guard size.width > 0, size.height > 0, !days.isEmpty else { return }
 
-        let graphInsets = EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
         let graphHeight = max(1, size.height - graphInsets.top - graphInsets.bottom)
         let stepX = days.count > 1 ? size.width / CGFloat(days.count - 1) : 0
+        let maximumTotal = days.map(\.totalClicks).max() ?? 0
+        let scaleMaximum = max(1, maximumTotal)
 
         func point(for day: ClickActivityDay, index: Int) -> CGPoint {
-            let normalized = CGFloat(day.totalClicks) / CGFloat(maximum)
+            let normalized = CGFloat(day.totalClicks) / CGFloat(scaleMaximum)
             return CGPoint(
                 x: CGFloat(index) * stepX,
                 y: graphInsets.top + graphHeight * (1 - normalized)
@@ -1297,7 +1297,8 @@ private struct ClickActivityHistoryGraph: View {
         )
         context.stroke(linePath, with: .color(accent), lineWidth: 2)
 
-        if let peak = points.enumerated().max(by: { days[$0.offset].totalClicks < days[$1.offset].totalClicks }) {
+        if maximumTotal > 0,
+           let peak = points.enumerated().max(by: { days[$0.offset].totalClicks < days[$1.offset].totalClicks }) {
             let markerRect = CGRect(x: peak.element.x - 3, y: peak.element.y - 3, width: 6, height: 6)
             context.fill(Path(ellipseIn: markerRect), with: .color(accent))
         }

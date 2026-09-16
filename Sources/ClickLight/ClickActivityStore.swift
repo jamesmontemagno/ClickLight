@@ -113,7 +113,7 @@ final class ClickActivityStore: ObservableObject {
 
     func accessibilityLabel(for day: ClickActivityDay) -> String {
         let dateLabel = date(from: day.id)?.formatted(date: .complete, time: .omitted) ?? day.id
-        return "\(dateLabel), \(day.totalClicks) clicks, \(day.drags) drags"
+        return "\(dateLabel), \(day.totalClicks) clicks"
     }
 
     func historyAccessibilityLabel(for days: [ClickActivityDay]) -> String {
