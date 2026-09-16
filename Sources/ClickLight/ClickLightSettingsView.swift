@@ -820,7 +820,7 @@ struct ClickLightSettingsView: View {
                 subtitle: "A 30-day trend of click activity saved locally on this Mac."
             ) {
                 HStack(spacing: 0) {
-                    ActivityMetric(title: "30 days", value: historyTotal)
+                    ActivityMetric(title: "30-day total", value: historyTotal)
                     Divider().frame(height: 44)
                     ActivityMetric(title: "Daily avg", value: historyAverage)
                 }
@@ -1219,6 +1219,7 @@ private struct ClickActivityHistoryGraph: View {
     let days: [ClickActivityDay]
     let rangeTitle: String
     let store: ClickActivityStore
+    private let gridDivisions = 3
 
     private var graphInsets: EdgeInsets {
         EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
@@ -1251,8 +1252,8 @@ private struct ClickActivityHistoryGraph: View {
         guard size.width > 0, size.height > 0 else { return }
         let graphHeight = max(1, size.height - graphInsets.top - graphInsets.bottom)
 
-        for index in 0...3 {
-            let y = graphInsets.top + graphHeight * CGFloat(index) / 3
+        for index in 0...gridDivisions {
+            let y = graphInsets.top + graphHeight * CGFloat(index) / CGFloat(gridDivisions)
             var path = Path()
             path.move(to: CGPoint(x: 0, y: y))
             path.addLine(to: CGPoint(x: size.width, y: y))

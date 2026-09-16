@@ -122,9 +122,13 @@ final class ClickActivityStore: ObservableObject {
     func historyAccessibilityLabel(for days: [ClickActivityDay]) -> String {
         let total = totalClicks(for: days)
         let average = dailyAverageClicks(for: days)
-        let peak = peakDay(in: days)
-        let peakLabel = peak.map { "\(shortDateLabel(for: $0)) with \($0.totalClicks) clicks" } ?? "no activity"
-        return "Click history graph, \(total) clicks over \(days.count) days, \(average) average clicks per day, peak \(peakLabel)"
+        let activitySummary: String
+        if total > 0, let peak = peakDay(in: days) {
+            activitySummary = "peak \(shortDateLabel(for: peak)) with \(peak.totalClicks) clicks"
+        } else {
+            activitySummary = "no recorded activity"
+        }
+        return "Click history graph, \(total) clicks over \(days.count) days, \(average) average clicks per day, \(activitySummary)"
     }
 
     private func add(_ update: (inout ClickActivityDay) -> Void) {
