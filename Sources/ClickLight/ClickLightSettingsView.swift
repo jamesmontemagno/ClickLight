@@ -811,6 +811,22 @@ struct ClickLightSettingsView: View {
                     .padding(.top, 8)
             }
 
+            SettingsCard(
+                title: "Click History",
+                subtitle: "A 30-day trend of click activity saved locally on this Mac."
+            ) {
+                HStack(spacing: 0) {
+                    ActivityMetric(title: "30 days", value: activityStore.lastThirtyDaysTotalClicks)
+                    Divider().frame(height: 44)
+                    ActivityMetric(title: "Daily avg", value: activityStore.lastThirtyDaysAverageClicks)
+                }
+                .padding(.vertical, 6)
+
+                ClickActivityHistoryGraph(days: activityStore.lastThirtyDays, store: activityStore)
+                    .frame(height: 160)
+                    .padding(.top, 8)
+            }
+
             SettingsCard(title: "Today") {
                 HStack(spacing: 0) {
                     ActivityMetric(title: "Left", value: activityStore.today.primaryClicks)
@@ -1191,6 +1207,99 @@ private struct ClickActivityChart: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(store.accessibilityLabel(for: day))
             }
+        }
+    }
+}
+
+private struct ClickActivityHistoryGraph: View {
+    let days: [ClickActivityDay]
+    @ObservedObject var store: ClickActivityStore
+
+    private var maximum: Int {
+        max(1, days.map(\.totalClicks).max() ?? 1)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Canvas { context, size in
+                drawGrid(in: &context, size: size)
+                drawTrend(in: &context, size: size)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(store.historyAccessibilityLabel(for: days))
+
+            if let first = days.first, let last = days.last {
+                HStack {
+                    Text(store.shortDateLabel(for: first))
+                    Spacer()
+                    Text("Last 30 days")
+                    Spacer()
+                    Text(store.shortDateLabel(for: last))
+                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func drawGrid(in context: inout GraphicsContext, size: CGSize) {
+        guard size.width > 0, size.height > 0 else { return }
+        let graphInsets = EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
+        let graphHeight = max(1, size.height - graphInsets.top - graphInsets.bottom)
+
+        for index in 0...3 {
+            let y = graphInsets.top + graphHeight * CGFloat(index) / 3
+            var path = Path()
+            path.move(to: CGPoint(x: 0, y: y))
+            path.addLine(to: CGPoint(x: size.width, y: y))
+            context.stroke(path, with: .color(.primary.opacity(0.08)), lineWidth: 1)
+        }
+    }
+
+    private func drawTrend(in context: inout GraphicsContext, size: CGSize) {
+        guard size.width > 0, size.height > 0, !days.isEmpty else { return }
+
+        let graphInsets = EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
+        let graphHeight = max(1, size.height - graphInsets.top - graphInsets.bottom)
+        let stepX = days.count > 1 ? size.width / CGFloat(days.count - 1) : 0
+
+        func point(for day: ClickActivityDay, index: Int) -> CGPoint {
+            let normalized = CGFloat(day.totalClicks) / CGFloat(maximum)
+            return CGPoint(
+                x: CGFloat(index) * stepX,
+                y: graphInsets.top + graphHeight * (1 - normalized)
+            )
+        }
+
+        let points = days.enumerated().map { point(for: $0.element, index: $0.offset) }
+        guard let firstPoint = points.first else { return }
+
+        var areaPath = Path()
+        areaPath.move(to: CGPoint(x: firstPoint.x, y: graphInsets.top + graphHeight))
+        points.forEach { areaPath.addLine(to: $0) }
+        if let lastPoint = points.last {
+            areaPath.addLine(to: CGPoint(x: lastPoint.x, y: graphInsets.top + graphHeight))
+        }
+        areaPath.closeSubpath()
+
+        var linePath = Path()
+        linePath.move(to: firstPoint)
+        points.dropFirst().forEach { linePath.addLine(to: $0) }
+
+        let accent = Color.accentColor
+        context.fill(
+            areaPath,
+            with: .linearGradient(
+                Gradient(colors: [accent.opacity(0.24), accent.opacity(0.04)]),
+                startPoint: CGPoint(x: 0, y: graphInsets.top),
+                endPoint: CGPoint(x: 0, y: graphInsets.top + graphHeight)
+            )
+        )
+        context.stroke(linePath, with: .color(accent), lineWidth: 2)
+
+        if let peak = points.enumerated().max(by: { days[$0.offset].totalClicks < days[$1.offset].totalClicks }) {
+            let markerRect = CGRect(x: peak.element.x - 3, y: peak.element.y - 3, width: 6, height: 6)
+            context.fill(Path(ellipseIn: markerRect), with: .color(accent))
         }
     }
 }
