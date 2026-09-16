@@ -108,24 +108,33 @@ final class ClickActivityStore: ObservableObject {
         return "\(dateLabel), \(day.totalClicks) clicks"
     }
 
+    /// Returns the summed click count for a prepared activity range.
     func totalClicks(for days: [ClickActivityDay]) -> Int {
         days.reduce(0) { $0 + $1.totalClicks }
     }
 
+    /// Returns the rounded daily average click count for a prepared activity range.
     func dailyAverageClicks(for days: [ClickActivityDay]) -> Int {
         guard !days.isEmpty else { return 0 }
         return Int((Double(totalClicks(for: days)) / Double(days.count)).rounded())
     }
 
+    /// Returns the latest peak activity day, or nil when the range has no recorded clicks.
     func peakDay(in days: [ClickActivityDay]) -> ClickActivityDay? {
         guard let index = peakDayIndex(in: days) else { return nil }
         return days[index]
     }
 
+    /// Returns the latest peak activity index, or nil when the range has no recorded clicks.
     func peakDayIndex(in days: [ClickActivityDay]) -> [ClickActivityDay].Index? {
-        days.indices.max { days[$0].totalClicks < days[$1].totalClicks }
+        guard let index = days.indices.max(by: { days[$0].totalClicks < days[$1].totalClicks }),
+              days[index].totalClicks > 0 else {
+            return nil
+        }
+        return index
     }
 
+    /// Returns the VoiceOver summary for a prepared history graph range.
     func historyAccessibilityLabel(for days: [ClickActivityDay]) -> String {
         let total = totalClicks(for: days)
         let average = dailyAverageClicks(for: days)

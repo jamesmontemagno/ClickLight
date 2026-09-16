@@ -797,8 +797,8 @@ struct ClickLightSettingsView: View {
 
         return VStack(spacing: 16) {
             SettingsCard(
-                title: "Daily Clicks",
-                subtitle: "Your last seven days. Stored locally on this Mac."
+                title: "Last 7 Days",
+                subtitle: "Recent daily click totals."
             ) {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(activityStore.today.totalClicks.formatted())
@@ -816,7 +816,7 @@ struct ClickLightSettingsView: View {
             }
 
             SettingsCard(
-                title: "Click History",
+                title: "Last 30 Days",
                 subtitle: "A 30-day trend of click activity saved locally on this Mac."
             ) {
                 HStack(spacing: 0) {
@@ -1220,10 +1220,7 @@ private struct ClickActivityHistoryGraph: View {
     let rangeTitle: String
     let store: ClickActivityStore
     private let gridDivisions = 3
-
-    private var graphInsets: EdgeInsets {
-        EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
-    }
+    private let graphInsets = EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -1302,8 +1299,7 @@ private struct ClickActivityHistoryGraph: View {
             )
         )
         context.stroke(linePath, with: .color(accent), lineWidth: 2)
-        if maximumTotal > 0,
-           let peakIndex = store.peakDayIndex(in: days) {
+        if let peakIndex = store.peakDayIndex(in: days) {
             let peakPoint = points[peakIndex]
             let markerRect = CGRect(x: peakPoint.x - 3, y: peakPoint.y - 3, width: 6, height: 6)
             context.fill(Path(ellipseIn: markerRect), with: .color(accent))
