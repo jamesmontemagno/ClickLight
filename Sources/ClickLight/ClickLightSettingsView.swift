@@ -1293,18 +1293,6 @@ private struct ClickActivityHistoryGraph: View {
         points.dropFirst().forEach { linePath.addLine(to: $0) }
 
         let accent = Color.accentColor
-        if points.count == 1 {
-            var singleDayPath = Path()
-            singleDayPath.move(to: CGPoint(x: 0, y: firstPoint.y))
-            singleDayPath.addLine(to: CGPoint(x: size.width, y: firstPoint.y))
-            context.stroke(singleDayPath, with: .color(accent), lineWidth: 2)
-            if maximumTotal > 0 {
-                let markerRect = CGRect(x: firstPoint.x - 3, y: firstPoint.y - 3, width: 6, height: 6)
-                context.fill(Path(ellipseIn: markerRect), with: .color(accent))
-            }
-            return
-        }
-
         context.fill(
             areaPath,
             with: .linearGradient(
@@ -1314,10 +1302,9 @@ private struct ClickActivityHistoryGraph: View {
             )
         )
         context.stroke(linePath, with: .color(accent), lineWidth: 2)
-
         if maximumTotal > 0,
-           let peakDay = store.peakDay(in: days),
-           let peakIndex = days.firstIndex(where: { $0.id == peakDay.id }) {
+        if maximumTotal > 0,
+           let peakIndex = store.peakDayIndex(in: days) {
             let peakPoint = points[peakIndex]
             let markerRect = CGRect(x: peakPoint.x - 3, y: peakPoint.y - 3, width: 6, height: 6)
             context.fill(Path(ellipseIn: markerRect), with: .color(accent))

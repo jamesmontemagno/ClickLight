@@ -16,6 +16,8 @@ struct ClickActivityDay: Codable, Equatable, Identifiable {
 
 @MainActor
 final class ClickActivityStore: ObservableObject {
+    private static let retainedDayCount = 30
+
     private enum Key {
         static let days = "clickActivityDays"
     }
@@ -41,7 +43,7 @@ final class ClickActivityStore: ObservableObject {
     }
 
     var lastThirtyDays: [ClickActivityDay] {
-        recentDays(count: 30)
+        recentDays(count: Self.retainedDayCount)
     }
 
     private func recentDays(count: Int) -> [ClickActivityDay] {
@@ -116,7 +118,12 @@ final class ClickActivityStore: ObservableObject {
     }
 
     func peakDay(in days: [ClickActivityDay]) -> ClickActivityDay? {
-        days.max { $0.totalClicks < $1.totalClicks }
+        guard let index = peakDayIndex(in: days) else { return nil }
+        return days[index]
+    }
+
+    func peakDayIndex(in days: [ClickActivityDay]) -> Array<ClickActivityDay>.Index? {
+        days.indices.max { days[$0].totalClicks < days[$1].totalClicks }
     }
 
     func historyAccessibilityLabel(for days: [ClickActivityDay]) -> String {
@@ -158,7 +165,7 @@ final class ClickActivityStore: ObservableObject {
     }
 
     private func pruneAndSave() {
-        guard let cutoff = calendar.date(byAdding: .day, value: -29, to: Date()) else { return }
+        guard let cutoff = calendar.date(byAdding: .day, value: -(Self.retainedDayCount - 1), to: Date()) else { return }
         let cutoffID = dayID(for: cutoff)
         days = days.filter { $0.id >= cutoffID }.sorted { $0.id < $1.id }
         guard let encoded = try? encoder.encode(days) else { return }
