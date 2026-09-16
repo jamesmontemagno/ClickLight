@@ -1303,7 +1303,6 @@ private struct ClickActivityHistoryGraph: View {
         )
         context.stroke(linePath, with: .color(accent), lineWidth: 2)
         if maximumTotal > 0,
-        if maximumTotal > 0,
            let peakIndex = store.peakDayIndex(in: days) {
             let peakPoint = points[peakIndex]
             let markerRect = CGRect(x: peakPoint.x - 3, y: peakPoint.y - 3, width: 6, height: 6)

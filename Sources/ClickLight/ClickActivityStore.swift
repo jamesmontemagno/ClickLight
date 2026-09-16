@@ -122,7 +122,7 @@ final class ClickActivityStore: ObservableObject {
         return days[index]
     }
 
-    func peakDayIndex(in days: [ClickActivityDay]) -> Array<ClickActivityDay>.Index? {
+    func peakDayIndex(in days: [ClickActivityDay]) -> [ClickActivityDay].Index? {
         days.indices.max { days[$0].totalClicks < days[$1].totalClicks }
     }
 
