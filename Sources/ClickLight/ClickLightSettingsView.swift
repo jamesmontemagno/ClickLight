@@ -791,7 +791,11 @@ struct ClickLightSettingsView: View {
     }
 
     private var activityPane: some View {
-        VStack(spacing: 16) {
+        let historyDays = activityStore.lastThirtyDays
+        let historyTotal = historyDays.reduce(0) { $0 + $1.totalClicks }
+        let historyAverage = historyDays.isEmpty ? 0 : Int((Double(historyTotal) / Double(historyDays.count)).rounded())
+
+        return VStack(spacing: 16) {
             SettingsCard(
                 title: "Daily Clicks",
                 subtitle: "Your last seven days. Stored locally on this Mac."
@@ -816,13 +820,13 @@ struct ClickLightSettingsView: View {
                 subtitle: "A 30-day trend of click activity saved locally on this Mac."
             ) {
                 HStack(spacing: 0) {
-                    ActivityMetric(title: "30 days", value: activityStore.lastThirtyDaysTotalClicks)
+                    ActivityMetric(title: "30 days", value: historyTotal)
                     Divider().frame(height: 44)
-                    ActivityMetric(title: "Daily avg", value: activityStore.lastThirtyDaysAverageClicks)
+                    ActivityMetric(title: "Daily avg", value: historyAverage)
                 }
                 .padding(.vertical, 6)
 
-                ClickActivityHistoryGraph(days: activityStore.lastThirtyDays, store: activityStore)
+                ClickActivityHistoryGraph(days: historyDays, store: activityStore)
                     .frame(height: 160)
                     .padding(.top, 8)
             }
@@ -1232,7 +1236,7 @@ private struct ClickActivityHistoryGraph: View {
                 HStack {
                     Text(store.shortDateLabel(for: first))
                     Spacer()
-                    Text("Last 30 days")
+                    Text("Last \(days.count) days")
                     Spacer()
                     Text(store.shortDateLabel(for: last))
                 }
@@ -1298,8 +1302,9 @@ private struct ClickActivityHistoryGraph: View {
         context.stroke(linePath, with: .color(accent), lineWidth: 2)
 
         if maximumTotal > 0,
-           let peak = points.enumerated().max(by: { days[$0.offset].totalClicks < days[$1.offset].totalClicks }) {
-            let markerRect = CGRect(x: peak.element.x - 3, y: peak.element.y - 3, width: 6, height: 6)
+           let peakIndex = days.indices.max(by: { days[$0].totalClicks < days[$1].totalClicks }) {
+            let peakPoint = points[peakIndex]
+            let markerRect = CGRect(x: peakPoint.x - 3, y: peakPoint.y - 3, width: 6, height: 6)
             context.fill(Path(ellipseIn: markerRect), with: .color(accent))
         }
     }

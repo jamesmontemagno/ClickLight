@@ -44,16 +44,6 @@ final class ClickActivityStore: ObservableObject {
         recentDays(count: 30)
     }
 
-    var lastThirtyDaysTotalClicks: Int {
-        lastThirtyDays.reduce(0) { $0 + $1.totalClicks }
-    }
-
-    var lastThirtyDaysAverageClicks: Int {
-        let history = lastThirtyDays
-        guard !history.isEmpty else { return 0 }
-        return Int((Double(history.reduce(0) { $0 + $1.totalClicks }) / Double(history.count)).rounded())
-    }
-
     private func recentDays(count: Int) -> [ClickActivityDay] {
         let now = Date()
         return (0..<count).reversed().compactMap { offset in
